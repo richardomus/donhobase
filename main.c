@@ -3,30 +3,46 @@
 #include <string.h>
 #include <time.h>
 
+#include "columns.h"
 #include "database.h"
 
 int main(int argc, char* argv[]) {
 
-    createNewTable("database.donho");
-
-    void* chunk = NULL;
     unsigned int i = 0;
 
-    DataSet row1, row2;
+    ColumnSet columnSet;
+    memset(&columnSet, 0, sizeof(ColumnSet));
 
-    row1.id = 0;
-    sprintf(row1.title, "Essa e a row chunk 1"); 
+    columns_append(&columnSet, Int);
+    columns_append(&columnSet, Char);
+    columns_append(&columnSet, Char);
+    columns_append(&columnSet, DateTime);
 
-    row2.id = 1;
-    sprintf(row2.title, "Essa e a row chunk 2"); 
+    createNewTable("database.donho", &columnSet);
 
-    writeNewChunkOnTable("database.donho", &row1, sizeof(DataSet));
-    writeNewChunkOnTable("database.donho", &row2, sizeof(DataSet));
+    void* chunk = malloc(columnSet.chunkSize);
+    
+    unsigned int value = 1;
+    chunk_write_data(&columnSet, 0, chunk, &value);
+    chunk_write_data(&columnSet, 1, chunk, "Esse é o texto numero 1");
+    chunk_write_data(&columnSet, 2, chunk, "Esse aqui e o texto final");
+
+    writeNewChunkOnTable("database.donho", chunk, columnSet.chunkSize);
 
     chunk = readPositionOnTable("database.donho", 0);
 
     while(chunk != NULL) {
-        printf("%d | %s\n", ((DataSet*)chunk)->id, ((DataSet*)chunk)->title);
+        
+        for(i = 0; i < columnSet.count; ++i) {
+            
+            void* data = chunk_read_data(&columnSet, i, chunk);
+            
+            switch(columnSet.set[i].type) { 
+                case Int: printf("%d |", *((unsigned int*)(data))); break;
+                case Char: printf("%s |", (char*)(data)); break;
+            }
+        }
+
         chunk = readPositionOnTable("database.donho", ++i);
     }
 

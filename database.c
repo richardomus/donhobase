@@ -3,15 +3,14 @@
 #include <string.h>
 #include <time.h>
 
+#include "columns.h"
 #include "database.h"
 
-unsigned int createNewTable(const char* dbTableName) {
+unsigned int createNewTable(const char* dbTableName, ColumnSet* columnSet) {
     
-    ColumnSet columnSet;
-    IndexSet index;
+    if(columnSet == NULL) return 0;
 
-    //first, we write the new ColumnSet
-    memset(&columnSet, 0, sizeof(ColumnSet));
+    IndexSet index;
     memset(&index, 0, sizeof(IndexSet));
     
     FILE* file = fopen(dbTableName, "rb+");
@@ -23,7 +22,7 @@ unsigned int createNewTable(const char* dbTableName) {
 
     file = fopen(dbTableName, "wb+");
 
-    fwrite(&columnSet, sizeof(ColumnSet), 1, file);
+    fwrite(columnSet, sizeof(ColumnSet), 1, file);
     fwrite(&index, sizeof(IndexSet), 1, file);
 
     fclose(file);
@@ -86,7 +85,7 @@ void* readPositionOnTable(const char* dbTableName, const unsigned int position) 
     }
 
     IndexObject item = index.set[position];
-    void* chunk = malloc(sizeof(item.size));
+    void* chunk = malloc(item.size);
     fseek(file, item.initPosition, SEEK_CUR);
     fread(chunk, item.size, 1, file);
 
