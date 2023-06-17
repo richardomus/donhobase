@@ -1,2 +1,2 @@
 all:
-	gcc database.c main.c -o database
+	gcc -g -ggdb database.c main.c -o database

@@ -27,8 +27,7 @@ int main(int argc, char* argv[]) {
 
     while(chunk != NULL) {
         printf("%d | %s\n", ((DataSet*)chunk)->id, ((DataSet*)chunk)->title);
-        i++;
-        chunk = readPositionOnTable("database.donho", i);
+        chunk = readPositionOnTable("database.donho", ++i);
     }
 
     return 0;

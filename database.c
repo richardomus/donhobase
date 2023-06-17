@@ -7,6 +7,13 @@
 
 unsigned int createNewTable(const char* dbTableName) {
     
+    ColumnSet columnSet;
+    IndexSet index;
+
+    //first, we write the new ColumnSet
+    memset(&columnSet, 0, sizeof(ColumnSet));
+    memset(&index, 0, sizeof(IndexSet));
+    
     FILE* file = fopen(dbTableName, "rb+");
 
     if(file != NULL) {
@@ -16,9 +23,7 @@ unsigned int createNewTable(const char* dbTableName) {
 
     file = fopen(dbTableName, "wb+");
 
-    IndexSet index;
-    index.count = 0;
-
+    fwrite(&columnSet, sizeof(ColumnSet), 1, file);
     fwrite(&index, sizeof(IndexSet), 1, file);
 
     fclose(file);
@@ -29,20 +34,23 @@ unsigned int createNewTable(const char* dbTableName) {
 
 unsigned int writeNewChunkOnTable(const char* dbTableName, void* chunk, const unsigned int chunkSize) {
     
+    ColumnSet columSet;
     IndexSet index;
 
     FILE* file = fopen(dbTableName, "rb+");
     
     if(file == NULL) return 0;
+    
+    fread(&columSet, sizeof(ColumnSet), 1, file);
 
     fread(&index, sizeof(IndexSet), 1, file);
 
-    IndexObject lastItem = index.set[index.count - 1];
+    IndexObject lastItem = index.set[index.count > 0 ? index.count -1 : 0];
 
     unsigned long int newPosition = lastItem.initPosition + lastItem.size;
 
     // recording the chunk on the file newPosition 
-    fseek(file, newPosition, 0);
+    fseek(file, newPosition, SEEK_CUR);
     fwrite(chunk, chunkSize, 1, file);
 
     //adding new index
@@ -51,10 +59,9 @@ unsigned int writeNewChunkOnTable(const char* dbTableName, void* chunk, const un
     newItem.initPosition = newPosition;
     newItem.size = chunkSize;
 
-    index.set[index.count] = newItem;
-    index.count++;
-
-    fseek(file, 0, 0);
+    index.set[index.count++] = newItem;
+    
+    fseek(file, sizeof(ColumnSet), SEEK_SET);
     fwrite(&index, sizeof(IndexSet), 1, file);
 
     fclose(file);
@@ -69,7 +76,8 @@ void* readPositionOnTable(const char* dbTableName, const unsigned int position) 
     if(file == NULL) return NULL;
 
     IndexSet index;
-
+    
+    fseek(file, sizeof(ColumnSet), SEEK_SET);
     fread(&index, sizeof(IndexSet), 1, file);
 
     if(position >= index.count) { 
@@ -79,7 +87,7 @@ void* readPositionOnTable(const char* dbTableName, const unsigned int position) 
 
     IndexObject item = index.set[position];
     void* chunk = malloc(sizeof(item.size));
-    fseek(file, item.initPosition, 0);
+    fseek(file, item.initPosition, SEEK_CUR);
     fread(chunk, item.size, 1, file);
 
     fclose(file);
