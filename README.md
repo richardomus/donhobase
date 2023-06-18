@@ -1,2 +1,2 @@
 # donhobase
-A small relational database written with C
+A small relational high-performatic database written in C
