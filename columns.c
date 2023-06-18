@@ -6,12 +6,13 @@
 #include "columns.h"
 #include "database.h"
 
-unsigned int columns_append(ColumnSet* columnSet, enum ColumnObjectTypeEnum type) {
+unsigned int columns_append(ColumnSet* columnSet, const char* name, enum ColumnObjectTypeEnum type) {
 
-    if(columnSet == NULL || type >= end) return 0;
+    if(columnSet == NULL || name == NULL || type >= end) return 0;
 
     ColumnObject* object = &columnSet->set[columnSet->count];
     object->type = type;
+    strcpy(object->name, name);
 
     switch(type) { 
         case Int: object->size = sizeof(unsigned int); break;
