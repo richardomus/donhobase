@@ -1,2 +1,2 @@
 all:
-	gcc -g -ggdb columns.c database.c main.c -o database
+	gcc -g -ggdb src/columns.c src/database.c src/main.c -o bin/database
