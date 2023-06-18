@@ -2,7 +2,7 @@
 #define __COLUMNS_H__
 
 #define COLUMNS_NAME_DEFAULT_SIZE 256
-#define COLUMNS_CHUNK_DEFAULT_SIZE 32
+#define COLUMNS_CHUNK_DEFAULT_SIZE 4096
 
 enum ColumnObjectTypeEnum {
     Int = 0,

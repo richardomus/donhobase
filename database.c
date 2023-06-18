@@ -33,15 +33,13 @@ unsigned int createNewTable(const char* dbTableName, ColumnSet* columnSet) {
 
 unsigned int writeNewChunkOnTable(const char* dbTableName, void* chunk, const unsigned int chunkSize) {
     
-    ColumnSet columSet;
     IndexSet index;
 
     FILE* file = fopen(dbTableName, "rb+");
     
     if(file == NULL) return 0;
     
-    fread(&columSet, sizeof(ColumnSet), 1, file);
-
+    fseek(file, sizeof(ColumnSet), SEEK_SET);
     fread(&index, sizeof(IndexSet), 1, file);
 
     IndexObject lastItem = index.set[index.count > 0 ? index.count -1 : 0];
