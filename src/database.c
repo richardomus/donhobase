@@ -5,6 +5,7 @@
 
 #include "columns.h"
 #include "database.h"
+#include "sql.h"
 
 unsigned int createNewTable(const char* dbTableName, ColumnSet* columnSet) {
     
