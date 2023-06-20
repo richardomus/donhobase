@@ -79,5 +79,5 @@ unsigned int parseSqlString(const char* sqlstring, SqlActionSet* actionSet) {
     strcpy(actionSet->actions[actionSet->count-1].buffer, buffer);
 
     free(buffer);
-    return 1;
+    return i;
 }
