@@ -11,18 +11,6 @@
 
 //SELECT T1.id, T2.id FROM TABELA1 as T1, TABELA2 as T2 WHERE T1.value = T2.value ORDER BY T1.id
 
-enum sqlActionsEnum {
-    create = 0,
-    delete,
-    drop,
-    from,
-    inner_join,
-    order_by,
-    outer_join,
-    select,
-    where
-};
-
 const char* sql_keywords[] = {
     "create",
     "delete",
@@ -35,7 +23,7 @@ const char* sql_keywords[] = {
     "where"
 };
 
-//"SELECT TITLE FROM database WHERE id = 1 AND id = 2 ORDER BY id DESC";
+//"SELECT TITLE FROM (select * from (select * from lalala),(select* from lelele) as LALALA WHERE lalalal.id > 10 ORDER BY id DESC";
 
 unsigned int parseSqlString(const char* sqlstring, SqlActionSet* actionSet) {
     
@@ -50,6 +38,19 @@ unsigned int parseSqlString(const char* sqlstring, SqlActionSet* actionSet) {
 
     do {
         c = sqlstring[i] >= 65 && sqlstring[i] <= 90 ? sqlstring[i] + 32 : sqlstring[i]; 
+
+        if(c == '(') {
+            ++i;
+            actionSet->children[actionSet->childCount] = sqlActionSetMalloc();
+            i += parseSqlString(&sqlstring[i], actionSet->children[actionSet->childCount]);
+            ++actionSet->childCount;
+        } else if( c == ')') {
+            buffer[w] = '\0';
+            //record last buffer in current action
+            strcpy(actionSet->actions[actionSet->count-1].buffer, buffer);
+            free(buffer);
+            return ++i;
+        }
 
         if (sql_keywords[j][k] == c) {
             buffer[w] = sqlstring[i];
@@ -80,4 +81,29 @@ unsigned int parseSqlString(const char* sqlstring, SqlActionSet* actionSet) {
 
     free(buffer);
     return i;
+}
+
+SqlActionSet* sqlActionSetMalloc() {
+    SqlActionSet* newSet = malloc(sizeof(SqlActionSet));
+    newSet->count = 0;
+    newSet->childCount = 0;
+    newSet->children = malloc(sizeof(SqlActionSet) * MAX_BUFFER_SQL_SETS_CHILDS);
+    memset(newSet->children, 0, sizeof(SqlActionSet) * MAX_BUFFER_SQL_SETS_CHILDS);
+    return newSet;
+}
+
+unsigned int sqlActionSetFree(SqlActionSet* set) {
+    if(set == NULL) return 0;
+   
+    if(set->children) {
+        unsigned int i;
+        for(i = 0; i < set->childCount; ++i) {
+            sqlActionSetFree(set->children[i]);
+        }
+        free(set->children);
+    }
+
+    free(set);
+
+    return 1;
 }

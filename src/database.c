@@ -92,3 +92,40 @@ void* readPositionOnTable(const char* dbTableName, const unsigned int position) 
     
     return chunk;
 }
+
+unsigned int printActionSet(SqlActionSet* set, unsigned int spaces) {
+
+    if(set == NULL) return 0;
+    unsigned int i;
+
+    for(i = 0; i < set->count; ++i) {
+        printf("%.*s %s %s\n", spaces, "\t\t\t\t\t\t\t\t\t", sql_keywords[set->actions[i].action], set->actions[i].buffer);
+    }
+
+    for(i = 0; i < set->childCount; ++i) {
+        printActionSet(set->children[i], ++spaces);
+    }
+
+    return 1;
+}
+
+unsigned int executeActionSet(SqlActionSet* set) {
+    
+    if(set == NULL) return 0;
+    
+    unsigned int i;
+
+    SqlAction* fromAction = NULL;
+
+    for(i = 0; i < set->count; ++i) {
+        if(set->actions[i].action == from) {
+            fromAction = &set->actions[i];
+        } 
+    }
+
+    if(fromAction) {
+        printf("%s.donho", fromAction->buffer);
+    }
+
+    return 1;
+}
