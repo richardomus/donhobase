@@ -8,7 +8,8 @@
 #include "sql.h"
 
 //const char sqlString[] = "select c.cid, c.cname, c.email, p.pid, p.pname, p.price from (select cid, cname, email from company where city = ‘Vancouver’) as c natural inner join (select cid, pid from sales where year = 2019) as s natural inner join (select pid, pname, price from products where company = ‘lego’) as p";
-const char sqlString[] = "SELECT t1.id FROM (select * from (select * from lululu)) as t1, (select id from lilili) as t2 WHERE id > 10 ORDER BY id DESC";
+//const char sqlString[] = "SELECT t1.id FROM (select * from (select * from lululu)) as t1, (select id from lilili) as t2 WHERE id > 10 ORDER BY id DESC";
+const char sqlString[] = "select * from database";
 
 int main(int argc, char* argv[]) {
 
@@ -19,11 +20,11 @@ int main(int argc, char* argv[]) {
     parseSqlString(sqlString, set);
      
     printActionSet(set, 0);
-    //executeActionSet(set);
-
-    //unsigned int a;
-    //for(a = 0; a < set.count; ++a) printf("%s %s\n", sql_keywords[set.actions[a].action], set.actions[a].buffer);
     
+    executeActionSet(set);
+
+    sqlActionSetFree(set);
+
     return 0;
 
     unsigned int i = 0, j = 0;
